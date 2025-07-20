@@ -12,12 +12,8 @@ client = MyClient(TOKEN)
 
 
 def main():
-    #print(datetime.now())
-    data = client.getTradingSchedules(datetime.now())
-    df = pd.DataFrame([vars(date) for date in data.exchanges[0].days])
-    df.to_csv("РасписаниеТоргов.csv")
-    print(df)
-
+    for share in client.getShares():
+        print(share.class_code)
 
 
 if __name__ == "__main__":
