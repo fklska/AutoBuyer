@@ -24,15 +24,30 @@ class MyClient:
     def getFigi(self, tiker: str):
         return self.client.instruments.share_by(id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=CLASS_CODE, id=tiker).instrument.figi
 
+    def getTickerByFigi(self, figi: str):
+        return self.client.instruments.share_by(id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI, class_code=CLASS_CODE, id=figi).instrument.ticker
+
     def getDiv(self, figi: str) -> list[Dividend]:
         date = datetime.now()
-        return self.client.instruments.get_dividends(figi=figi, from_=date, to=date + timedelta(days=30)).dividends
+        return self.client.instruments.get_dividends(figi=figi, from_=date, to=date + timedelta(days=60)).dividends
 
     def UpdateOrderList(self):
         divs_data = []
+        tickers = []
+        value = []
+        count_to_order = []
+        valid_money = self.get_RUB_limits(self.iis_id).units
+
         for share_figi in REESTR_FIGI:
             for divs in self.getDiv(share_figi):
-                divs_data.append(divs.last_buy_date)
+                if divs:
+                    tickers.append(self.getTickerByFigi(share_figi))
+                    divs_data.append(divs.last_buy_date)
+                    value.append(divs.dividend_net.units)
+                    count_to_order.append(valid_money*0.2 // int(divs.close_price.units))
+
+        return pd.DataFrame({"Share": tickers,"Date": divs_data, "Value": value, "Order": count_to_order})
+
 
     def get_RUB_limits(self, id: str):
         for curr in self.client.operations.get_withdraw_limits(account_id=id).money:

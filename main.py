@@ -14,8 +14,9 @@ client = MyClient(TOKEN)
 client.iis_id = IIS_ID
 
 def main():
-    print(client.get_RUB_limits(IIS_ID))
-
+    df = (client.UpdateOrderList())
+    df.to_csv("ORDER_LIST.csv")
+    #print(updateFigiReestr())
 
 def pipeline():
     pass
